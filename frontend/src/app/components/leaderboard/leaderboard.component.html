@@ -1,0 +1,204 @@
+<div class="leaderboard-container">
+  <!-- Header & Filter Bar -->
+  <header class="leaderboard-header neu-card">
+    <div class="title-group">
+      <div class="badge-row">
+        <span class="neu-badge neu-badge-student">Academic Standings</span>
+        <span class="neu-chip">Sorted by Completed Problems Count</span>
+      </div>
+      <h1 class="page-title">College Department Leaderboard</h1>
+      <p class="page-subtitle">Rankings dynamically determined by students' highest completed problems count and verified test solutions.</p>
+    </div>
+
+    <!-- Department & Batch Filter Pills -->
+    <div class="filters-row">
+      <div class="filter-group">
+        <span class="filter-label">Department:</span>
+        <div class="neu-pill-toggle">
+          <button
+            type="button"
+            *ngFor="let dept of departments"
+            class="neu-pill-btn"
+            [class.active]="selectedDepartment === dept"
+            (click)="onDepartmentChange(dept)"
+          >
+            {{ dept }}
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Batch:</span>
+        <div class="neu-pill-toggle">
+          <button
+            type="button"
+            *ngFor="let b of batches"
+            class="neu-pill-btn"
+            [class.active]="selectedBatch === b"
+            (click)="onBatchChange(b)"
+          >
+            {{ b }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Logged-in Student Standing Tracker Banner -->
+  <section class="my-standing-banner neu-card" *ngIf="myRankEntry">
+    <div class="my-standing-left">
+      <div class="my-rank-badge">
+        <span class="rank-lbl">Your Rank</span>
+        <span class="rank-val">#{{ myRankEntry.rank }}</span>
+      </div>
+      <div class="my-info">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <h3 class="my-name">{{ myRankEntry.name }}</h3>
+          <span class="my-badge">You</span>
+        </div>
+        <span class="my-meta">Roll: <strong>{{ myRankEntry.rollNumber }}</strong> • {{ myRankEntry.department }} ({{ myRankEntry.batch }})</span>
+      </div>
+    </div>
+
+    <div class="my-standing-stats">
+      <div class="stat-box neu-card-inset">
+        <span class="stat-lbl">Problems Completed</span>
+        <span class="stat-val" style="color: var(--neu-primary);">🏆 {{ myRankEntry.totalSolved }}</span>
+      </div>
+      <div class="stat-box neu-card-inset">
+        <span class="stat-lbl">Platform Accuracy</span>
+        <span class="stat-val" style="color: var(--neu-success);">🎯 {{ myRankEntry.accuracyRate }}%</span>
+      </div>
+      <div class="stat-box neu-card-inset">
+        <span class="stat-lbl">Daily Streak</span>
+        <span class="stat-val" style="color: var(--neu-warning);">🔥 {{ myRankEntry.currentStreak }} Days</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top 3 Podium (Ranked strictly by highest completed problems) -->
+  <section class="podium-section" *ngIf="filteredEntries.length >= 3">
+    <!-- Rank 2: Silver (Left) -->
+    <div
+      class="podium-card podium-silver neu-card neu-card-hover"
+      [class.podium-active-user]="isCurrentStudent(filteredEntries[1])"
+    >
+      <div class="medal-badge silver-medal">
+        🥈 2nd Place <span *ngIf="isCurrentStudent(filteredEntries[1])">(You)</span>
+      </div>
+      <div class="avatar-ring silver-ring">
+        {{ filteredEntries[1].name.charAt(0) }}
+      </div>
+      <h3 class="student-name">{{ filteredEntries[1].name }}</h3>
+      <span class="student-meta">{{ filteredEntries[1].rollNumber }} • {{ filteredEntries[1].department }}</span>
+      <div class="stat-pill neu-card-inset">
+        <span class="solved-hero">🏆 {{ filteredEntries[1].totalSolved }} Solved</span>
+        <span class="accuracy-tag">🎯 {{ filteredEntries[1].accuracyRate }}%</span>
+      </div>
+    </div>
+
+    <!-- Rank 1: Gold (Center - Elevated) -->
+    <div
+      class="podium-card podium-gold neu-card neu-card-hover"
+      [class.podium-active-user]="isCurrentStudent(filteredEntries[0])"
+    >
+      <div class="crown-icon">👑</div>
+      <div class="medal-badge gold-medal">
+        🥇 1st Place <span *ngIf="isCurrentStudent(filteredEntries[0])">(You)</span>
+      </div>
+      <div class="avatar-ring gold-ring">
+        {{ filteredEntries[0].name.charAt(0) }}
+      </div>
+      <h2 class="student-name gold-name">{{ filteredEntries[0].name }}</h2>
+      <span class="student-meta">{{ filteredEntries[0].rollNumber }} • {{ filteredEntries[0].department }}</span>
+      <div class="stat-pill neu-card-inset">
+        <span class="solved-hero gold-hero">🏆 {{ filteredEntries[0].totalSolved }} Solved</span>
+        <span class="accuracy-tag">🎯 {{ filteredEntries[0].accuracyRate }}%</span>
+      </div>
+    </div>
+
+    <!-- Rank 3: Bronze (Right) -->
+    <div
+      class="podium-card podium-bronze neu-card neu-card-hover"
+      [class.podium-active-user]="isCurrentStudent(filteredEntries[2])"
+    >
+      <div class="medal-badge bronze-medal">
+        🥉 3rd Place <span *ngIf="isCurrentStudent(filteredEntries[2])">(You)</span>
+      </div>
+      <div class="avatar-ring bronze-ring">
+        {{ filteredEntries[2].name.charAt(0) }}
+      </div>
+      <h3 class="student-name">{{ filteredEntries[2].name }}</h3>
+      <span class="student-meta">{{ filteredEntries[2].rollNumber }} • {{ filteredEntries[2].department }}</span>
+      <div class="stat-pill neu-card-inset">
+        <span class="solved-hero">🏆 {{ filteredEntries[2].totalSolved }} Solved</span>
+        <span class="accuracy-tag">🎯 {{ filteredEntries[2].accuracyRate }}%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Complete Rankings Table / Cards -->
+  <section class="rankings-table-section neu-card">
+    <div class="table-header-row">
+      <span class="col-rank">Rank</span>
+      <span class="col-student">Student</span>
+      <span class="col-dept">Department</span>
+      <span class="col-batch">Batch</span>
+      <span class="col-solved-header">Problems Completed</span>
+      <span class="col-accuracy">Accuracy</span>
+    </div>
+
+    <div class="table-body">
+      <div
+        class="table-row neu-card-flat"
+        *ngFor="let item of filteredEntries"
+        [class.highlight-row]="isCurrentStudent(item)"
+      >
+        <div class="col-rank">
+          <span class="rank-circle" [ngClass]="'rank-' + item.rank">
+            #{{ item.rank }}
+          </span>
+        </div>
+
+        <div class="col-student">
+          <div class="student-avatar-sm">{{ item.name.charAt(0) }}</div>
+          <div class="student-info-col">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span class="name-bold">{{ item.name }}</span>
+              <span class="my-badge" *ngIf="isCurrentStudent(item)">You</span>
+            </div>
+            <span class="roll-sub">{{ item.rollNumber }}</span>
+          </div>
+        </div>
+
+        <div class="col-dept">
+          <span class="neu-badge neu-chip">{{ item.department }}</span>
+        </div>
+
+        <div class="col-batch">
+          <span class="batch-text">{{ item.batch }}</span>
+        </div>
+
+        <div class="col-solved-cell">
+          <div class="solved-pill-display">
+            <span class="solved-num">{{ item.totalSolved }}</span>
+            <span class="solved-label">completed</span>
+          </div>
+        </div>
+
+        <div class="col-accuracy">
+          <div class="accuracy-bar-wrapper">
+            <div class="accuracy-track">
+              <div class="accuracy-fill" [style.width.%]="item.accuracyRate"></div>
+            </div>
+            <span class="accuracy-text">{{ item.accuracyRate }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-filter-state" *ngIf="filteredEntries.length === 0">
+        <p>No students found matching the selected department and batch filters.</p>
+      </div>
+    </div>
+  </section>
+</div>

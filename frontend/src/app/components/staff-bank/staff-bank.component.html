@@ -1,0 +1,533 @@
+<div class="staff-bank-container">
+  <!-- Toast Notification -->
+  <div class="toast-notification neu-card-convex" *ngIf="successToast">
+    <span>✅</span> {{ successToast }}
+  </div>
+
+  <!-- Staff Header -->
+  <header class="staff-header neu-card">
+    <div class="header-content">
+      <div class="badge-row">
+        <span class="neu-badge neu-badge-staff">Staff Management</span>
+        <span class="neu-chip">Faculty Portal</span>
+      </div>
+      <h1 class="page-title">Problem Bank & Daily Assessment Scheduler</h1>
+      <p class="page-subtitle">Author algorithmic challenges, configure test suites, and schedule 24-hour daily challenges for students.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="neu-btn neu-btn-primary" (click)="openCreateModal()">
+        <span>➕</span> Author New Problem
+      </button>
+    </div>
+  </header>
+
+  <!-- Split View: Problem Bank on Left, Calendar Bindings on Right -->
+  <div class="staff-split-grid">
+    <!-- Left: Problem Bank Collection -->
+    <section class="bank-section neu-card">
+      <div class="section-titlebar">
+        <h2 class="section-title">Problem Bank ({{ problems.length }})</h2>
+        <span class="neu-chip">Verified Curriculum</span>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="neu-spinner-ring"></div>
+        <p>Loading problems from database...</p>
+      </div>
+
+      <div class="problems-list" *ngIf="!isLoading">
+        <div class="empty-state neu-card-inset" *ngIf="problems.length === 0" style="padding: 1.5rem; text-align: center;">
+          <p>No problems in database yet. Click "Author New Problem" above to create one!</p>
+        </div>
+
+        <div class="problem-item-card neu-card-flat" [ngClass]="getDifficultyOutlineClass(p.difficulty)" *ngFor="let p of problems">
+          <div class="item-header">
+            <span class="neu-badge" [ngClass]="'neu-badge-' + p.difficulty.toLowerCase()">
+              {{ p.difficulty }}
+            </span>
+            <span class="topic-tag neu-chip">{{ p.topic }}</span>
+          </div>
+
+          <h3 class="item-title">{{ p.title }}</h3>
+          <p class="item-desc">{{ p.statement }}</p>
+
+          <!-- Staff Name Below Question Section -->
+          <div class="question-staff-bar">
+            <span>👨‍🏫 Staff Author: <strong>{{ getStaffAuthorName(p) }}</strong></span>
+          </div>
+
+          <div class="test-cases-summary neu-card-inset" style="margin-top: 0.6rem;">
+            <span>Public Cases: <strong>{{ p.testCases.length }}</strong></span>
+            <span>Hidden Cases: <strong>{{ p.hiddenTestCases?.length || 0 }}</strong></span>
+          </div>
+
+          <div class="item-actions">
+            <button type="button" class="neu-btn neu-btn-sm neu-btn-primary" (click)="quickScheduleForToday(p)">
+              ⚡ Set for Today
+            </button>
+            <button type="button" class="neu-btn neu-btn-sm" (click)="openScheduleModal(p)">
+              📅 Schedule Date
+            </button>
+            <button type="button" class="neu-btn neu-btn-sm" (click)="viewSolvers(p._id, p.title)">
+              👥 Solvers
+            </button>
+            <button type="button" class="neu-btn neu-btn-sm text-danger" (click)="deleteProblem(p._id)">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Daily Schedule Calendar Bindings & Direct Scheduler -->
+    <section class="schedule-section neu-card">
+      <div class="section-titlebar">
+        <h2 class="section-title">Daily Problem Scheduler</h2>
+        <span class="neu-chip">24h Lifecycle</span>
+      </div>
+
+      <!-- Active Problem for Today Spotlight -->
+      <div class="active-today-card neu-card-inset mb-3" style="padding: 1rem; border-radius: var(--neu-radius-md);">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="neu-badge" [ngClass]="todayScheduledProblem ? 'neu-badge-easy' : 'neu-badge-medium'">
+            {{ todayScheduledProblem ? '● Active Today Challenge' : '⚠ No Problem Set For Today' }}
+          </span>
+          <span *ngIf="todayScheduledProblem" class="neu-chip" style="font-size: 0.72rem;">
+            24h Window Active
+          </span>
+        </div>
+
+        <div *ngIf="todayScheduledProblem" class="mt-2">
+          <h3 style="margin: 0.25rem 0; font-size: 1.1rem; color: var(--neu-text-primary);">{{ todayScheduledProblem.title }}</h3>
+          <!-- Staff Name Below Question -->
+          <div class="question-staff-bar" style="margin: 0.4rem 0;">
+            <span>👨‍🏫 Staff Author: <strong>{{ getStaffAuthorName(todayScheduledProblem) }}</strong></span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; flex-wrap: wrap;">
+            <span class="neu-badge" [ngClass]="'neu-badge-' + todayScheduledProblem.difficulty.toLowerCase()">
+              {{ todayScheduledProblem.difficulty }}
+            </span>
+            <span class="neu-chip">{{ todayScheduledProblem.topic }}</span>
+            <button type="button" class="neu-btn neu-btn-sm neu-btn-primary" (click)="viewSolvers(todayScheduledProblem._id, todayScheduledProblem.title, scheduledDate)">
+              👥 View Solved Students
+            </button>
+            <button type="button" class="neu-btn neu-btn-sm text-danger" (click)="clearSchedule(scheduledDate)" style="margin-left: auto;">
+              ✕ Clear Today
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!todayScheduledProblem" style="padding: 0.5rem 0; color: var(--neu-text-secondary); font-size: 0.88rem;">
+          Students currently see <em>"Staff Not Selected"</em>. Choose a problem below to activate today's challenge.
+        </div>
+      </div>
+
+      <!-- Direct Scheduler Box: Choose Problem & Date -->
+      <div class="scheduler-picker-box neu-card-flat" style="padding: 1rem; border-radius: var(--neu-radius-md); margin-bottom: 1.25rem;">
+        <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: var(--neu-text-primary);">📅 Choose & Assign Daily Problem:</h4>
+        
+        <div class="neu-input-group mb-2">
+          <label class="neu-label">Target Date:</label>
+          <input type="date" class="neu-input" [(ngModel)]="scheduledDate" name="scheduledDate" />
+        </div>
+
+        <div class="neu-input-group mb-3">
+          <label class="neu-label">Choose Problem from Bank:</label>
+          <select class="neu-select" [(ngModel)]="schedulerSelectedProblemId" name="selectedProblemId" style="width: 100%;">
+            <option value="" disabled selected>-- Select a problem to schedule --</option>
+            <option *ngFor="let p of problems" [value]="p._id">
+              {{ p.title }} ({{ p.difficulty }} - {{ p.topic }})
+            </option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          class="neu-btn neu-btn-success full-btn"
+          (click)="scheduleFromDropdown()"
+          [disabled]="!schedulerSelectedProblemId"
+        >
+          📌 Set as Daily Problem (Start 24h Cycle)
+        </button>
+      </div>
+
+      <!-- Scheduled Calendar Bindings Timeline -->
+      <h4 style="margin: 0.5rem 0; font-size: 0.9rem; color: var(--neu-text-secondary); text-transform: uppercase;">
+        Scheduled Calendar Pipeline ({{ scheduledProblems.length }})
+      </h4>
+
+      <div class="schedule-timeline" style="max-height: 250px; overflow-y: auto;">
+        <div class="empty-state" *ngIf="scheduledProblems.length === 0" style="padding: 1rem; text-align: center; color: var(--neu-text-muted); font-size: 0.85rem;">
+          No future scheduled challenges yet.
+        </div>
+        <div class="timeline-row neu-card-flat" *ngFor="let sc of scheduledProblems" style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="date-badge neu-card-inset" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; font-weight: 700;">
+              {{ sc.date }}
+            </div>
+            <div>
+              <strong class="sc-title" style="font-size: 0.9rem;">{{ sc.title }}</strong>
+              <span class="neu-badge ml-2" [ngClass]="'neu-badge-' + sc.difficulty.toLowerCase()" style="font-size: 0.7rem; margin-left: 0.4rem;">
+                {{ sc.difficulty }}
+              </span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <button
+              type="button"
+              class="neu-btn neu-btn-sm"
+              *ngIf="sc.problemId"
+              (click)="viewSolvers(sc.problemId, sc.title, sc.date)"
+              title="View students who solved this challenge"
+            >
+              👥 Solvers
+            </button>
+            <button type="button" class="neu-btn-icon text-danger" (click)="clearSchedule(sc.date)" title="Remove schedule">
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Author Problem Modal -->
+  <div class="neu-modal-backdrop" *ngIf="isCreateModalOpen" (click)="closeCreateModal()">
+    <div class="neu-modal author-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Author New Algorithmic Problem</h2>
+          <p class="modal-subtitle">Add problem specifications, test cases, and persist directly to Database</p>
+        </div>
+        <button type="button" class="close-btn neu-btn-icon" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      <!-- Error Alert in Modal -->
+      <div class="neu-alert-error" *ngIf="errorMessage">
+        <span>⚠️</span> {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="saveProblem()">
+        <div class="neu-input-group">
+          <label class="neu-label">Problem Title *</label>
+          <input
+            type="text"
+            class="neu-input"
+            [(ngModel)]="formTitle"
+            name="title"
+            placeholder="e.g. Reverse a String or Print N Numbers"
+            required
+          />
+        </div>
+
+        <div class="form-row-2col">
+          <div class="neu-input-group">
+            <label class="neu-label">Difficulty</label>
+            <select class="neu-select" [(ngModel)]="formDifficulty" name="difficulty">
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+
+          <div class="neu-input-group">
+            <label class="neu-label">Topic Category</label>
+            <input
+              type="text"
+              class="neu-input"
+              [(ngModel)]="formTopic"
+              name="topic"
+              placeholder="e.g. Strings & Hashing"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="neu-input-group">
+          <label class="neu-label">Problem Statement *</label>
+          <textarea
+            class="neu-textarea"
+            rows="3"
+            [(ngModel)]="formStatement"
+            name="statement"
+            placeholder="Write clear instructions for students..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-row-2col">
+          <div class="neu-input-group">
+            <label class="neu-label">Input Format</label>
+            <input
+              type="text"
+              class="neu-input"
+              [(ngModel)]="formInputFormat"
+              name="inputFormat"
+              placeholder="e.g. Single integer n or string s"
+            />
+          </div>
+          <div class="neu-input-group">
+            <label class="neu-label">Output Format</label>
+            <input
+              type="text"
+              class="neu-input"
+              [(ngModel)]="formOutputFormat"
+              name="outputFormat"
+              placeholder="e.g. Output result string or number"
+            />
+          </div>
+        </div>
+
+        <!-- Flexible Public Test Cases (Starts with 3 Cases, + Logo to Add More) -->
+        <div style="background: rgba(0,0,0,0.03); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.25rem; border: 1px solid rgba(79, 70, 229, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--neu-primary); margin: 0;">
+                🔓 Public Test Cases (Flexible: 3 Default)
+              </h4>
+              <span style="font-size: 0.78rem; color: var(--neu-text-muted);">Displayed to students for dry runs</span>
+            </div>
+            <button
+              type="button"
+              class="neu-btn neu-btn-sm neu-btn-primary"
+              (click)="addPublicTestCase()"
+              title="Add another public test case"
+              style="display: flex; align-items: center; gap: 0.35rem;"
+            >
+              <span style="font-size: 1.1rem; line-height: 1;">➕</span> Add Public Case
+            </button>
+          </div>
+
+          <div
+            class="testcase-card neu-card-flat mb-3"
+            *ngFor="let tc of publicTestCases; let idx = index"
+            style="padding: 0.85rem; border-radius: 8px; margin-bottom: 0.75rem;"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span class="neu-chip" style="font-size: 0.75rem; font-weight: 700; color: var(--neu-primary);">
+                Sample Test Case #{{ idx + 1 }}
+              </span>
+              <button
+                type="button"
+                class="neu-btn-icon text-danger"
+                *ngIf="publicTestCases.length > 1"
+                (click)="removePublicTestCase(idx)"
+                title="Remove this test case"
+                style="font-size: 0.75rem; width: 24px; height: 24px;"
+              >
+                ✕
+              </button>
+            </div>
+            <div class="form-row-2col">
+              <div class="neu-input-group">
+                <label class="neu-label">Sample Input *</label>
+                <input
+                  type="text"
+                  class="neu-input"
+                  [(ngModel)]="tc.input"
+                  [name]="'pubInput_' + idx"
+                  placeholder="e.g. 5 or 2 7 11 15\n9"
+                  required
+                />
+              </div>
+              <div class="neu-input-group">
+                <label class="neu-label">Expected Output *</label>
+                <input
+                  type="text"
+                  class="neu-input"
+                  [(ngModel)]="tc.expectedOutput"
+                  [name]="'pubOutput_' + idx"
+                  placeholder="e.g. 1 2 3 4 5 or [0, 1]"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden Assessment Test Cases ("N" Section, + Logo to Add N Cases) -->
+        <div style="background: rgba(0,0,0,0.03); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.25rem; border: 1px solid rgba(245, 158, 11, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: #d97706; margin: 0;">
+                🔒 Hidden Assessment Test Cases ("N" Section)
+              </h4>
+              <span style="font-size: 0.78rem; color: var(--neu-text-muted);">Strictly evaluated upon submit to grade solutions</span>
+            </div>
+            <button
+              type="button"
+              class="neu-btn neu-btn-sm"
+              (click)="addHiddenTestCase()"
+              title="Add another hidden test case"
+              style="display: flex; align-items: center; gap: 0.35rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white;"
+            >
+              <span style="font-size: 1.1rem; line-height: 1;">➕</span> Add Hidden Case
+            </button>
+          </div>
+
+          <div
+            class="testcase-card neu-card-flat mb-3"
+            *ngFor="let htc of hiddenTestCases; let idx = index"
+            style="padding: 0.85rem; border-radius: 8px; margin-bottom: 0.75rem;"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span class="neu-chip" style="font-size: 0.75rem; font-weight: 700; color: #d97706;">
+                Hidden Case #{{ idx + 1 }}
+              </span>
+              <button
+                type="button"
+                class="neu-btn-icon text-danger"
+                (click)="removeHiddenTestCase(idx)"
+                title="Remove this hidden test case"
+                style="font-size: 0.75rem; width: 24px; height: 24px;"
+              >
+                ✕
+              </button>
+            </div>
+            <div class="form-row-2col">
+              <div class="neu-input-group">
+                <label class="neu-label">Hidden Input</label>
+                <input
+                  type="text"
+                  class="neu-input"
+                  [(ngModel)]="htc.input"
+                  [name]="'hiddenInput_' + idx"
+                  placeholder="e.g. 10 or 1 5 8 10\n18"
+                />
+              </div>
+              <div class="neu-input-group">
+                <label class="neu-label">Hidden Expected Output</label>
+                <input
+                  type="text"
+                  class="neu-input"
+                  [(ngModel)]="htc.expectedOutput"
+                  [name]="'hiddenOutput_' + idx"
+                  placeholder="e.g. 1 2 3 4 5 6 7 8 9 10"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="hiddenTestCases.length === 0" style="padding: 0.5rem 0; color: var(--neu-text-muted); font-size: 0.85rem; font-style: italic; text-align: center;">
+            No hidden test cases added yet. Click "+ Add Hidden Case" above to add N hidden test cases.
+          </div>
+        </div>
+
+        <div class="neu-input-group">
+          <label class="neu-label">Constraints</label>
+          <input
+            type="text"
+            class="neu-input"
+            [(ngModel)]="formConstraints"
+            name="constraints"
+            placeholder="e.g. 1 <= len(s) <= 10^5"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="neu-btn neu-btn-primary full-btn mt-3"
+          [disabled]="isSaving"
+        >
+          <span class="spinner" *ngIf="isSaving"></span>
+          {{ isSaving ? 'Saving to Database...' : '💾 Save Problem to Problem Bank' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedule to Date Modal -->
+  <div class="neu-modal-backdrop" *ngIf="isScheduleModalOpen && selectedProblemForSchedule" (click)="closeScheduleModal()">
+    <div class="neu-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Schedule Daily Problem</h2>
+          <p class="modal-subtitle">{{ selectedProblemForSchedule.title }}</p>
+        </div>
+        <button type="button" class="close-btn neu-btn-icon" (click)="closeScheduleModal()">✕</button>
+      </div>
+
+      <div class="neu-input-group">
+        <label class="neu-label">Target Calendar Date (YYYY-MM-DD)</label>
+        <input type="date" class="neu-input" [(ngModel)]="scheduledDate" name="scheduledDate" required />
+      </div>
+
+      <button type="button" class="neu-btn neu-btn-success full-btn mt-2" (click)="saveSchedule()">
+        Confirm Daily Problem Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- Solved Students Modal: Who Solved This Daily Problem -->
+  <div class="neu-modal-backdrop" *ngIf="isSolversModalOpen" (click)="closeSolversModal()">
+    <div class="neu-modal solvers-modal" (click)="$event.stopPropagation()" style="max-width: 680px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">👥 Solved Students: {{ solversProblemTitle }}</h2>
+          <p class="modal-subtitle">Students who successfully submitted and passed all test cases for this challenge.</p>
+        </div>
+        <button type="button" class="close-btn neu-btn-icon" (click)="closeSolversModal()">✕</button>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoadingSolvers" style="padding: 2.5rem; text-align: center;">
+        <div class="neu-spinner-ring"></div>
+        <p style="margin-top: 1rem; color: var(--neu-text-muted);">Fetching student submission records from database...</p>
+      </div>
+
+      <div *ngIf="!isLoadingSolvers">
+        <!-- Status Note Banner (e.g. Scheduled for future date) -->
+        <div class="neu-card-inset" *ngIf="solversStatusNote" style="padding: 0.75rem 1rem; border-radius: var(--neu-radius-md); font-size: 0.88rem; font-weight: 600; color: var(--neu-primary); margin-bottom: 1rem; background: rgba(99, 102, 241, 0.08);">
+          ℹ️ {{ solversStatusNote }}
+        </div>
+
+        <!-- Summary Stats Header -->
+        <div style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+          <span class="neu-badge neu-badge-easy" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+            ✓ Total Solved: {{ selectedDailySolvers.length }} Students
+          </span>
+          <span class="neu-chip" style="font-size: 0.75rem;">
+            Verified MongoDB Submissions
+          </span>
+        </div>
+
+        <!-- Empty State When No One Has Solved Yet -->
+        <div class="empty-state neu-card-inset" *ngIf="selectedDailySolvers.length === 0" style="padding: 2.5rem 1.5rem; text-align: center; border-radius: var(--neu-radius-md);">
+          <div style="font-size: 2.8rem; margin-bottom: 0.75rem;">📝</div>
+          <h3 style="margin: 0 0 0.4rem 0; font-size: 1.1rem; color: var(--neu-text-primary);">No Students Have Solved This Yet</h3>
+          <p style="margin: 0; font-size: 0.88rem; color: var(--neu-text-muted);">
+            As soon as a registered student passes all test cases for this daily challenge, their profile, department, and runtime will appear here.
+          </p>
+        </div>
+
+        <!-- Solvers List Cards -->
+        <div class="solvers-list" *ngIf="selectedDailySolvers.length > 0" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-right: 4px;">
+          <div class="solver-item neu-card-flat" *ngFor="let s of selectedDailySolvers" style="padding: 0.85rem 1rem; border-radius: var(--neu-radius-md); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div class="avatar-sm" style="width: 40px; height: 40px; border-radius: 50%; background: var(--neu-primary-gradient); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; box-shadow: 2px 2px 6px rgba(79, 70, 229, 0.3);">
+                {{ s.name.charAt(0) }}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: var(--neu-text-primary); font-size: 0.95rem;">
+                  {{ s.name }}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--neu-text-muted);">
+                  Roll: <strong style="color: var(--neu-text-secondary);">{{ s.rollNumber }}</strong> • {{ s.department }} ({{ s.batch }})
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span class="neu-chip" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">
+                {{ s.language }}
+              </span>
+              <span class="neu-badge neu-badge-easy" style="font-size: 0.78rem;">
+                ✓ {{ s.executionTime }} ms
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

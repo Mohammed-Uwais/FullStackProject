@@ -1,0 +1,507 @@
+/**
+ * ==============================================================================
+ * College DailyCoding - Neumorphism / Soft UI Global Design System Tokens
+ * ==============================================================================
+ * Architecture: Clean CSS Custom Properties (Variables) & Reusable Utility Classes
+ * Palette: Harmonious neutral clay tones with high-contrast functional accents
+ */
+
+:root {
+  /* Surface & Canvas Colors */
+  --neu-bg: #e0e5ec;
+  --neu-bg-secondary: #e6ebf2;
+  --neu-bg-inset: #d9dee5;
+  --neu-surface: #e0e5ec;
+  --neu-surface-raised: #e4e9f0;
+
+  /* Typography Colors */
+  --neu-text-primary: #1f2937;
+  --neu-text-secondary: #4b5563;
+  --neu-text-muted: #6b7280;
+  --neu-text-light: #9ca3af;
+  --neu-text-white: #ffffff;
+
+  /* Primary Brand Accents */
+  --neu-primary: #4f46e5;
+  --neu-primary-hover: #4338ca;
+  --neu-primary-light: #e0e7ff;
+  --neu-primary-gradient: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  --neu-primary-glow: rgba(79, 70, 229, 0.4);
+
+  /* Functional Status Accents */
+  --neu-success: #10b981;
+  --neu-success-light: #d1fae5;
+  --neu-success-text: #065f46;
+  --neu-danger: #ef4444;
+  --neu-danger-light: #fee2e2;
+  --neu-danger-text: #991b1b;
+  --neu-warning: #f59e0b;
+  --neu-warning-light: #fef3c7;
+  --neu-warning-text: #92400e;
+  --neu-info: #0284c7;
+  --neu-info-light: #e0f2fe;
+  --neu-info-text: #075985;
+
+  /* Difficulty Color System */
+  --neu-easy: #10b981;
+  --neu-medium: #f59e0b;
+  --neu-hard: #ef4444;
+
+  /* Neumorphic Shadow Matrices (Light Source: Top-Left @ 135deg) */
+  --neu-shadow-flat: 8px 8px 16px #c5c9ce, -8px -8px 16px #ffffff;
+  --neu-shadow-sm: 4px 4px 8px #c5c9ce, -4px -4px 8px #ffffff;
+  --neu-shadow-lg: 14px 14px 28px #b8bcc2, -14px -14px 28px #ffffff;
+  --neu-shadow-hover: 12px 12px 22px #b4b8be, -12px -12px 22px #ffffff;
+  --neu-shadow-pressed: inset 4px 4px 8px #c5c9ce, inset -4px -4px 8px #ffffff;
+  --neu-shadow-inset: inset 4px 4px 8px #c5c9ce, inset -4px -4px 8px #ffffff;
+  --neu-shadow-inset-deep: inset 6px 6px 12px #b8bcc2, inset -6px -6px 12px #ffffff;
+
+  /* Surface Gradient Presets */
+  --neu-grad-convex: linear-gradient(145deg, #f0f5fd, #cacfd4);
+  --neu-grad-concave: linear-gradient(145deg, #cacfd4, #f0f5fd);
+
+  /* Geometry & Spacing */
+  --neu-radius-sm: 8px;
+  --neu-radius-md: 14px;
+  --neu-radius-lg: 20px;
+  --neu-radius-xl: 28px;
+  --neu-radius-pill: 9999px;
+
+  /* Typography Standard */
+  --neu-font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --neu-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+
+  /* Animation & Transitions */
+  --neu-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --neu-transition-fast: all 0.15s ease-in-out;
+}
+
+/* ==============================================================================
+ * Global Base Styles
+ * ============================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--neu-font-sans);
+  background-color: var(--neu-bg);
+  color: var(--neu-text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth custom neumorphic scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neu-bg);
+  box-shadow: var(--neu-shadow-inset);
+  border-radius: var(--neu-radius-pill);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b8bcc2;
+  border-radius: var(--neu-radius-pill);
+  box-shadow: var(--neu-shadow-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* ==============================================================================
+ * Neumorphic Cards & Panels
+ * ============================================================================== */
+.neu-card {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius-lg);
+  box-shadow: var(--neu-shadow-flat);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 1.5rem;
+  transition: var(--neu-transition);
+}
+
+.neu-card-hover:hover {
+  box-shadow: var(--neu-shadow-hover);
+  transform: translateY(-3px);
+}
+
+.neu-card-flat {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius-md);
+  box-shadow: var(--neu-shadow-sm);
+  padding: 1rem;
+}
+
+.neu-card-convex {
+  background: var(--neu-grad-convex);
+  border-radius: var(--neu-radius-lg);
+  box-shadow: var(--neu-shadow-flat);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 1.5rem;
+}
+
+.neu-card-inset {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius-lg);
+  box-shadow: var(--neu-shadow-inset);
+  padding: 1.5rem;
+}
+
+/* ==============================================================================
+ * Neumorphic Interactive Buttons
+ * ============================================================================== */
+.neu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--neu-font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--neu-text-primary);
+  background: var(--neu-bg);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--neu-radius-md);
+  padding: 0.7rem 1.4rem;
+  cursor: pointer;
+  outline: none;
+  box-shadow: var(--neu-shadow-sm);
+  transition: var(--neu-transition-fast);
+  user-select: none;
+}
+
+.neu-btn:hover {
+  box-shadow: var(--neu-shadow-flat);
+  color: var(--neu-primary);
+  transform: translateY(-2px);
+}
+
+.neu-btn:active,
+.neu-btn.active {
+  box-shadow: var(--neu-shadow-pressed);
+  transform: translateY(1px);
+  color: var(--neu-primary);
+}
+
+.neu-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  border-color: transparent;
+  transform: none;
+}
+
+.neu-btn-primary {
+  background: var(--neu-primary-gradient);
+  color: var(--neu-text-white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 4px 4px 14px rgba(79, 70, 229, 0.35), -4px -4px 14px #ffffff;
+}
+
+.neu-btn-primary:hover {
+  color: var(--neu-text-white);
+  box-shadow: 6px 6px 18px rgba(79, 70, 229, 0.45), -6px -6px 18px #ffffff;
+  transform: translateY(-2px);
+}
+
+.neu-btn-primary:active {
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.2);
+  transform: translateY(1px);
+}
+
+.neu-btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 4px 4px 14px rgba(16, 185, 129, 0.35), -4px -4px 14px #ffffff;
+}
+
+.neu-btn-success:hover {
+  color: #ffffff;
+  box-shadow: 6px 6px 18px rgba(16, 185, 129, 0.45), -6px -6px 18px #ffffff;
+  transform: translateY(-2px);
+}
+
+.neu-btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--neu-primary);
+  color: var(--neu-primary);
+}
+
+.neu-btn-outline:hover {
+  background: var(--neu-primary-light);
+}
+
+/* Icon-Only Circular Button */
+.neu-btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==============================================================================
+ * Neumorphic Form Controls
+ * ============================================================================== */
+.neu-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.15rem;
+  text-align: left;
+}
+
+.neu-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--neu-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.neu-input,
+.neu-select,
+.neu-textarea {
+  width: 100%;
+  font-family: var(--neu-font-sans);
+  font-size: 0.95rem;
+  color: var(--neu-text-primary);
+  background: var(--neu-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--neu-radius-md);
+  padding: 0.75rem 1.1rem;
+  box-shadow: var(--neu-shadow-inset);
+  outline: none;
+  transition: var(--neu-transition-fast);
+}
+
+.neu-input:focus,
+.neu-select:focus,
+.neu-textarea:focus {
+  box-shadow: var(--neu-shadow-inset-deep), 0 0 0 2px var(--neu-primary-light);
+  border-color: var(--neu-primary);
+}
+
+.neu-input::placeholder,
+.neu-textarea::placeholder {
+  color: var(--neu-text-light);
+}
+
+/* ==============================================================================
+ * Badges & Status Chips
+ * ============================================================================== */
+.neu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--neu-radius-pill);
+  box-shadow: var(--neu-shadow-sm);
+  background: var(--neu-bg);
+}
+
+.neu-badge-easy {
+  color: var(--neu-easy);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.neu-badge-medium {
+  color: var(--neu-medium);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.neu-badge-hard {
+  color: var(--neu-hard);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.neu-badge-student {
+  color: var(--neu-primary);
+  background: var(--neu-primary-light);
+  box-shadow: inset 1px 1px 2px rgba(79, 70, 229, 0.2);
+}
+
+.neu-badge-staff {
+  color: #7c3aed;
+  background: #ede9fe;
+  box-shadow: inset 1px 1px 2px rgba(124, 58, 237, 0.2);
+}
+
+/* ==============================================================================
+ * Terminal & Code Displays
+ * ============================================================================== */
+.neu-terminal-box {
+  background: #1b2028;
+  color: #e2e8f0;
+  border-radius: var(--neu-radius-md);
+  box-shadow: var(--neu-shadow-inset-deep);
+  font-family: var(--neu-font-mono);
+  font-size: 0.85rem;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid #2d3748;
+}
+
+.neu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--neu-radius-sm);
+  background: var(--neu-bg);
+  box-shadow: var(--neu-shadow-sm);
+  color: var(--neu-text-secondary);
+}
+
+/* ==============================================================================
+ * Modal Overlays & Inset Wells
+ * ============================================================================== */
+.neu-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(31, 41, 55, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.neu-modal {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius-xl);
+  box-shadow: var(--neu-shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  animation: modal-enter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Inset Pill Toggle (e.g. Student vs Staff) */
+.neu-pill-toggle {
+  display: inline-flex;
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius-pill);
+  padding: 0.35rem;
+  box-shadow: var(--neu-shadow-inset);
+  gap: 0.25rem;
+}
+
+.neu-pill-btn {
+  font-family: var(--neu-font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--neu-text-secondary);
+  border-radius: var(--neu-radius-pill);
+  cursor: pointer;
+  transition: var(--neu-transition-fast);
+}
+
+.neu-pill-btn.active {
+  background: var(--neu-primary-gradient);
+  color: #ffffff;
+  box-shadow: 2px 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+/* ==============================================================================
+ * Keyframe Animations
+ * ============================================================================== */
+@keyframes neu-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}
+
+.neu-pulse-active {
+  animation: neu-pulse 2s infinite;
+}
+
+/* ==============================================================================
+ * Question Difficulty Outlines (Green for Easy, Yellow for Medium, Red for Hard)
+ * ============================================================================== */
+.outline-easy {
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.28), var(--neu-shadow-flat) !important;
+}
+
+.outline-medium {
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.28), var(--neu-shadow-flat) !important;
+}
+
+.outline-hard {
+  border: 2px solid #ef4444 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.28), var(--neu-shadow-flat) !important;
+}
+
+/* Subtle inset / hover outlines */
+.outline-easy:hover {
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4), var(--neu-shadow-hover) !important;
+}
+
+.outline-medium:hover {
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4), var(--neu-shadow-hover) !important;
+}
+
+.outline-hard:hover {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4), var(--neu-shadow-hover) !important;
+}
+
+/* Question Staff Attribution Bar */
+.question-staff-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(79, 70, 229, 0.05);
+  border: 1px dashed rgba(79, 70, 229, 0.25);
+  border-radius: var(--neu-radius-sm);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--neu-text-secondary);
+  margin-top: 0.5rem;
+}
+
+.question-staff-bar strong {
+  color: var(--neu-primary);
+  font-weight: 700;
+}
+

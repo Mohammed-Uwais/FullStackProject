@@ -1,0 +1,14 @@
+/* Google Fonts Preconnect & Import: Outfit (UI) + JetBrains Mono (Code) */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Import Base Neumorphism Design Tokens and Reusable Utilities */
+@import './styles/neumorphism.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--neu-bg);
+  color: var(--neu-text-primary);
+  font-family: var(--neu-font-sans);
+}

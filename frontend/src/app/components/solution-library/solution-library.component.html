@@ -1,0 +1,330 @@
+<div class="library-container">
+  <!-- Header with Live Search & Section Filter -->
+  <header class="library-header neu-card">
+    <div class="header-top">
+      <div class="header-left">
+        <div class="badge-row">
+          <span class="neu-badge neu-badge-student">Academic Archive</span>
+          <span class="neu-chip">{{ allProblems.length }} Total • {{ solvedProblems.length }} Solved • {{ unsolvedProblems.length }} Unsolved</span>
+        </div>
+        <h1 class="page-title">Problem Library & Solved Archive</h1>
+        <p class="page-subtitle">Search and explore all coding challenges in the problem bank, or filter strictly by your solved and unsolved status.</p>
+      </div>
+
+      <!-- Section Switcher Toggle: 3 Modes (All, My Solved, Unsolved) -->
+      <div class="section-toggle-box neu-card-inset">
+        <button
+          type="button"
+          class="toggle-tab-btn"
+          [class.active]="activeSection === 'all'"
+          (click)="activeSection = 'all'; showOnlyUnsolved = false"
+        >
+          🌐 All Problems ({{ allProblems.length }})
+        </button>
+        <button
+          type="button"
+          class="toggle-tab-btn"
+          [class.active]="activeSection === 'solved'"
+          (click)="activeSection = 'solved'; showOnlyUnsolved = false"
+        >
+          ✅ My Solved ({{ solvedProblems.length }})
+        </button>
+        <button
+          type="button"
+          class="toggle-tab-btn"
+          [class.active]="activeSection === 'unsolved'"
+          (click)="activeSection = 'unsolved'; showOnlyUnsolved = true"
+        >
+          ⏳ Unsolved ({{ unsolvedProblems.length }})
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Section & Difficulty Filter Row -->
+    <div class="search-filter-row mt-3">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="neu-input search-input"
+          [(ngModel)]="searchQuery"
+          placeholder="Search problems by title, topic, or keyword..."
+        />
+        <button
+          type="button"
+          class="clear-search-btn"
+          *ngIf="searchQuery"
+          (click)="searchQuery = ''"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Quick Toggle: Only Unsolved Problems -->
+      <button
+        type="button"
+        class="neu-btn neu-btn-sm"
+        [ngClass]="activeSection === 'unsolved' || showOnlyUnsolved ? 'neu-btn-primary' : ''"
+        (click)="toggleShowOnlyUnsolved()"
+        style="white-space: nowrap; font-weight: 700;"
+        title="Toggle view to show only unsolved problems"
+      >
+        <span>⚡ Only Unsolved</span>
+        <span class="neu-badge neu-badge-sm ml-1" style="margin-left: 0.35rem; font-size: 0.72rem;">
+          {{ unsolvedProblems.length }}
+        </span>
+      </button>
+
+      <div class="difficulty-pills">
+        <button
+          type="button"
+          class="diff-pill-btn"
+          *ngFor="let diff of ['All', 'Easy', 'Medium', 'Hard']"
+          [class.active]="selectedDifficulty === diff"
+          (click)="selectedDifficulty = diff"
+        >
+          {{ diff }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 1: ALL CURRICULUM PROBLEMS (Outlined by Difficulty: Green / Yellow / Red) -->
+  <section class="problems-view-section" *ngIf="activeSection === 'all'">
+    <div class="section-bar">
+      <h2 class="view-title">All College Problems ({{ filteredAllProblems.length }})</h2>
+      <span class="neu-chip">Live Question Bank</span>
+    </div>
+
+    <div class="empty-state neu-card-inset" *ngIf="filteredAllProblems.length === 0">
+      <p>No problems found matching "{{ searchQuery }}".</p>
+    </div>
+
+    <div class="problems-grid" *ngIf="filteredAllProblems.length > 0">
+      <div
+        class="problem-card neu-card neu-card-hover"
+        [ngClass]="getDifficultyOutlineClass(p.difficulty)"
+        *ngFor="let p of filteredAllProblems"
+      >
+        <div class="card-top">
+          <span class="neu-badge" [ngClass]="'neu-badge-' + p.difficulty.toLowerCase()">
+            {{ p.difficulty }}
+          </span>
+          <span class="neu-badge neu-badge-easy" *ngIf="isProblemSolved(p)">
+            ✅ Solved
+          </span>
+          <span class="neu-badge neu-badge-medium" *ngIf="!isProblemSolved(p)">
+            ⏳ Unsolved
+          </span>
+          <span class="topic-tag neu-chip">{{ p.topic }}</span>
+        </div>
+
+        <h3 class="problem-title">{{ p.title }}</h3>
+        <p class="problem-statement-preview">{{ p.statement }}</p>
+
+        <!-- Staff Name below the question -->
+        <div class="question-staff-bar">
+          <span>👨‍🏫 Staff Author: <strong>{{ getStaffAuthorName(p) }}</strong></span>
+        </div>
+
+        <div class="card-meta neu-card-inset" style="margin-top: 0.6rem;">
+          <span>Test Cases: <strong>{{ p.testCases.length }}</strong></span>
+          <span>Languages: <strong>{{ p.allowedLanguages.length }}</strong></span>
+        </div>
+
+        <div class="card-actions card-actions-dual">
+          <button type="button" class="neu-btn neu-btn-primary solve-btn" (click)="onSolveProblem(p)">
+            💻 Solve Challenge
+          </button>
+          <button type="button" class="neu-btn neu-btn-secondary detail-btn" (click)="viewProblemDetail(p)">
+            📖 Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: MY SOLVED PROBLEMS (Outlined by Difficulty: Green / Yellow / Red) -->
+  <section class="problems-view-section" *ngIf="activeSection === 'solved'">
+    <div class="section-bar">
+      <h2 class="view-title">My Accepted Solutions ({{ filteredSolvedProblems.length }})</h2>
+      <span class="neu-chip">Verified Solutions</span>
+    </div>
+
+    <div class="empty-state neu-card-inset" *ngIf="filteredSolvedProblems.length === 0">
+      <p>No solved solutions matching your search query.</p>
+    </div>
+
+    <div class="solutions-grid" *ngIf="filteredSolvedProblems.length > 0">
+      <div
+        class="solution-card neu-card neu-card-hover"
+        [ngClass]="getDifficultyOutlineClass(item.difficulty)"
+        *ngFor="let item of filteredSolvedProblems"
+        (click)="viewSolution(item)"
+      >
+        <div class="card-top">
+          <span class="neu-badge" [ngClass]="'neu-badge-' + item.difficulty.toLowerCase()">
+            {{ item.difficulty }}
+          </span>
+          <span class="neu-badge neu-badge-easy">✅ Accepted</span>
+          <span class="lang-tag neu-chip">{{ item.language.toUpperCase() }}</span>
+        </div>
+
+        <h3 class="problem-title">{{ item.problemTitle }}</h3>
+        <span class="topic-sub">{{ item.topic }}</span>
+
+        <div class="card-metrics neu-card-inset">
+          <div class="metric-item">
+            <span class="m-label">Runtime</span>
+            <span class="m-val">{{ item.executionTime }} ms</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-label">Memory</span>
+            <span class="m-val">{{ (item.memoryUsed / 1024).toFixed(1) }} MB</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span class="solved-date">Solved on {{ item.solvedAt }}</span>
+          <span class="view-btn">Inspect Code →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: UNSOLVED PROBLEMS ONLY (Outlined by Difficulty: Green / Yellow / Red) -->
+  <section class="problems-view-section" *ngIf="activeSection === 'unsolved'">
+    <div class="section-bar">
+      <h2 class="view-title">⏳ Unsolved College Problems ({{ filteredUnsolvedProblems.length }})</h2>
+      <span class="neu-chip">Action Required</span>
+    </div>
+
+    <div class="empty-state neu-card-inset" *ngIf="filteredUnsolvedProblems.length === 0">
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎉</div>
+      <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--neu-text-primary);">All Problems Solved!</h3>
+      <p>You have solved every available challenge in this selection category. Keep up your streak!</p>
+    </div>
+
+    <div class="problems-grid" *ngIf="filteredUnsolvedProblems.length > 0">
+      <div
+        class="problem-card neu-card neu-card-hover"
+        [ngClass]="getDifficultyOutlineClass(p.difficulty)"
+        *ngFor="let p of filteredUnsolvedProblems"
+      >
+        <div class="card-top">
+          <span class="neu-badge" [ngClass]="'neu-badge-' + p.difficulty.toLowerCase()">
+            {{ p.difficulty }}
+          </span>
+          <span class="neu-badge neu-badge-medium">
+            ⏳ Unsolved
+          </span>
+          <span class="topic-tag neu-chip">{{ p.topic }}</span>
+        </div>
+
+        <h3 class="problem-title">{{ p.title }}</h3>
+        <p class="problem-statement-preview">{{ p.statement }}</p>
+
+        <!-- Staff Name below the question -->
+        <div class="question-staff-bar">
+          <span>👨‍🏫 Staff Author: <strong>{{ getStaffAuthorName(p) }}</strong></span>
+        </div>
+
+        <div class="card-meta neu-card-inset" style="margin-top: 0.6rem;">
+          <span>Test Cases: <strong>{{ p.testCases.length }}</strong></span>
+          <span>Languages: <strong>{{ p.allowedLanguages.length }}</strong></span>
+        </div>
+
+        <div class="card-actions card-actions-dual">
+          <button type="button" class="neu-btn neu-btn-primary solve-btn" (click)="onSolveProblem(p)">
+            💻 Solve Challenge Now
+          </button>
+          <button type="button" class="neu-btn neu-btn-secondary detail-btn" (click)="viewProblemDetail(p)">
+            📖 Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal 1: Code Solution Inspection Modal -->
+  <div class="neu-modal-backdrop" *ngIf="isCodeModalOpen && activeSolvedItem" (click)="closeCodeModal()">
+    <div class="neu-modal code-modal" [ngClass]="getDifficultyOutlineClass(activeSolvedItem.difficulty)" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="neu-badge" [ngClass]="'neu-badge-' + activeSolvedItem.difficulty.toLowerCase()">
+            {{ activeSolvedItem.difficulty }}
+          </span>
+          <h2 class="modal-title">{{ activeSolvedItem.problemTitle }}</h2>
+          <span class="modal-subtitle">{{ activeSolvedItem.topic }} • {{ activeSolvedItem.language.toUpperCase() }}</span>
+        </div>
+        <button type="button" class="close-btn neu-btn-icon" (click)="closeCodeModal()">✕</button>
+      </div>
+
+      <div class="metrics-row-modal">
+        <div class="neu-chip">⚡ Runtime: {{ activeSolvedItem.executionTime }} ms</div>
+        <div class="neu-chip">💾 Memory: {{ (activeSolvedItem.memoryUsed / 1024).toFixed(1) }} MB</div>
+        <div class="neu-chip">📅 Solved: {{ activeSolvedItem.solvedAt }}</div>
+      </div>
+
+      <div class="code-container neu-terminal-box">
+        <pre><code>{{ activeSolvedItem.code }}</code></pre>
+      </div>
+
+      <div class="modal-footer-actions" style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="neu-btn neu-btn-secondary" (click)="closeCodeModal()">
+          Close
+        </button>
+        <button type="button" class="neu-btn neu-btn-primary" (click)="onSolveFromSolvedItem(activeSolvedItem)">
+          💻 Open & Edit in Workspace
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Problem Details Modal for All Problems -->
+  <div class="neu-modal-backdrop" *ngIf="isProblemDetailModalOpen && selectedProblemForDetail" (click)="closeProblemDetailModal()">
+    <div class="neu-modal problem-detail-modal" [ngClass]="getDifficultyOutlineClass(selectedProblemForDetail.difficulty)" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="neu-badge" [ngClass]="'neu-badge-' + selectedProblemForDetail.difficulty.toLowerCase()">
+            {{ selectedProblemForDetail.difficulty }}
+          </span>
+          <h2 class="modal-title">{{ selectedProblemForDetail.title }}</h2>
+          <span class="modal-subtitle">{{ selectedProblemForDetail.topic }}</span>
+        </div>
+        <button type="button" class="close-btn neu-btn-icon" (click)="closeProblemDetailModal()">✕</button>
+      </div>
+
+      <div class="modal-body-content" style="max-height: 60vh; overflow-y: auto;">
+        <h4 style="margin: 0.5rem 0; color: #4338ca;">Statement</h4>
+        <p style="line-height: 1.6; color: #1e293b; white-space: pre-line;">{{ selectedProblemForDetail.statement }}</p>
+
+        <!-- Staff Name Below Question Section -->
+        <div class="question-staff-bar" style="margin: 0.75rem 0;">
+          <span>👨‍🏫 Staff Author: <strong>{{ getStaffAuthorName(selectedProblemForDetail) }}</strong></span>
+        </div>
+
+        <h4 style="margin: 1rem 0 0.5rem 0; color: #4338ca;">Input & Output Specification</h4>
+        <div class="neu-card-inset" style="padding: 0.75rem 1rem; border-radius: var(--neu-radius-md); font-size: 0.9rem;">
+          <strong>Input:</strong> {{ selectedProblemForDetail.inputFormat }}<br>
+          <strong style="margin-top: 0.4rem; display: inline-block;">Output:</strong> {{ selectedProblemForDetail.outputFormat }}
+        </div>
+
+        <h4 style="margin: 1rem 0 0.5rem 0; color: #4338ca;">Sample Test Case</h4>
+        <div class="neu-card-flat" *ngIf="selectedProblemForDetail.testCases.length > 0" style="padding: 0.75rem 1rem; border-radius: var(--neu-radius-md);">
+          <div><strong>Input:</strong> <code>{{ selectedProblemForDetail.testCases[0].input }}</code></div>
+          <div style="margin-top: 0.35rem;"><strong>Expected Output:</strong> <code>{{ selectedProblemForDetail.testCases[0].expectedOutput }}</code></div>
+        </div>
+      </div>
+
+      <div class="modal-footer-actions" style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="neu-btn neu-btn-secondary" (click)="closeProblemDetailModal()">
+          Close
+        </button>
+        <button type="button" class="neu-btn neu-btn-primary" (click)="onSolveProblem(selectedProblemForDetail)">
+          🚀 Solve This Challenge Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

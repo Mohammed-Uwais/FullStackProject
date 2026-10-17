@@ -1,0 +1,422 @@
+<!-- Empty State: Displayed when Staff has NOT selected today's problem and no problem selected -->
+<div class="empty-daily-view neu-card" *ngIf="!isEditorActive" style="margin: 3rem auto; max-width: 620px; text-align: center; padding: 3rem 2rem; border-radius: var(--neu-radius-lg);">
+  <div style="font-size: 3.5rem; margin-bottom: 1rem;">📋</div>
+  <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--neu-text-primary); margin-bottom: 0.5rem;">
+    Staff Not Yet Selected Today's Problem
+  </h2>
+  <p style="font-size: 0.95rem; color: var(--neu-text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
+    Staff has not yet selected a daily problem for today. You can select and solve any other problem from the Problem Bank below:
+  </p>
+
+  <div class="quick-practice-box" *ngIf="availableProblems.length > 0" style="display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; align-items: center; max-width: 520px; margin: 0 auto;">
+    <div style="display: flex; gap: 0.5rem; width: 100%; align-items: center;">
+      <select class="neu-select" [(ngModel)]="selectedPickerProblemId" style="flex: 1; padding: 0.6rem 0.8rem; font-size: 0.9rem;">
+        <option *ngFor="let p of displayedProblems" [value]="p._id">
+          {{ isProblemSolved(p) ? '✅' : '⏳' }} {{ p.title }} ({{ p.difficulty }})
+        </option>
+      </select>
+      <button
+        type="button"
+        class="neu-btn neu-btn-primary"
+        [disabled]="!selectedPickerProblemId"
+        (click)="startPracticeWithProblem(selectedPickerProblemId)"
+      >
+        💻 Solve Now
+      </button>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button
+        type="button"
+        class="neu-btn neu-btn-sm"
+        [class.neu-btn-primary]="filterOnlyUnsolved"
+        (click)="toggleFilterOnlyUnsolved()"
+        style="font-size: 0.78rem; padding: 0.35rem 0.8rem;"
+      >
+        {{ filterOnlyUnsolved ? '⚡ Showing Unsolved Only' : '🔍 Filter: Show Unsolved Only' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="coding-workspace-container" *ngIf="isEditorActive">
+  <!-- Left Side: Problem Statement & Constraints Panel (Outlined by Difficulty: Green / Yellow / Red) -->
+  <aside class="problem-panel neu-card" [ngClass]="getDifficultyOutlineClass(problem.difficulty)">
+    <div class="problem-header">
+      <div class="badge-row">
+        <span class="neu-badge" [ngClass]="getDifficultyClass(problem.difficulty)">
+          {{ problem.difficulty }}
+        </span>
+        <span class="neu-badge neu-chip">
+          <i class="icon-tag"></i> {{ problem.topic }}
+        </span>
+      </div>
+
+      <!-- 24-Hour Active Countdown Pill (Daily scheduled mode) -->
+      <div class="daily-timer-box neu-card-inset" *ngIf="isDailyProblemActive && !isPracticeMode && timerCountdownString" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.9rem; border-radius: var(--neu-radius-md); margin-bottom: 1rem; color: #4338ca; font-weight: 700; font-size: 0.88rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+        ⏱️ 24h Daily Challenge: {{ timerCountdownString }} Remaining
+      </div>
+
+      <!-- Practice Mode Pill (Curriculum Problem Bank) -->
+      <div class="daily-timer-box neu-card-inset" *ngIf="isPracticeMode" style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.5rem 0.9rem; border-radius: var(--neu-radius-md); margin-bottom: 1rem; color: #0284c7; font-weight: 700; font-size: 0.88rem;">
+        <span>🎯 Curriculum Practice Mode</span>
+        <span class="neu-chip" style="font-size: 0.75rem; padding: 0.2rem 0.55rem;">Problem Bank</span>
+      </div>
+
+      <!-- Problem Switcher Dropdown in problem panel -->
+      <div class="problem-switcher-box" *ngIf="availableProblems.length > 0" style="margin-bottom: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--neu-text-muted); margin: 0;">
+            Select Challenge:
+          </label>
+          <button
+            type="button"
+            class="neu-btn neu-btn-sm"
+            style="font-size: 0.7rem; padding: 0.15rem 0.55rem; font-weight: 700;"
+            [class.neu-btn-primary]="filterOnlyUnsolved"
+            (click)="toggleFilterOnlyUnsolved()"
+            title="Toggle between all problems and only unsolved problems"
+          >
+            {{ filterOnlyUnsolved ? '⚡ Only Unsolved' : 'All Problems' }}
+          </button>
+        </div>
+        <select
+          class="neu-select"
+          style="width: 100%; font-size: 0.85rem; padding: 0.45rem 0.65rem;"
+          [ngModel]="problem._id"
+          (ngModelChange)="onSelectProblemById($event)"
+        >
+          <option *ngFor="let p of displayedProblems" [value]="p._id">
+            {{ isProblemSolved(p) ? '✅' : '⏳' }} {{ p.title }} ({{ p.difficulty }})
+          </option>
+        </select>
+      </div>
+
+      <h1 class="problem-title">{{ problem.title }}</h1>
+    </div>
+
+    <div class="problem-body">
+      <!-- Problem Statement -->
+      <section class="section-block">
+        <h3 class="section-heading">Description</h3>
+        <p class="statement-text">{{ problem.statement }}</p>
+      </section>
+
+      <!-- Examples & Test Questions Section -->
+      <section class="section-block">
+        <h3 class="section-heading">
+          <span>💡</span> Examples & Test Cases
+        </h3>
+
+        <!-- When problem has examples -->
+        <div class="example-card neu-card-flat" *ngFor="let ex of problem.examples; let idx = index">
+          <div class="example-badge">Example {{ idx + 1 }}</div>
+          <div class="example-io">
+            <span class="io-label">Input:</span>
+            <code class="io-code">{{ ex.input }}</code>
+          </div>
+          <div class="example-io">
+            <span class="io-label">Output:</span>
+            <code class="io-code">{{ ex.output }}</code>
+          </div>
+          <div class="example-io" *ngIf="ex.explanation">
+            <span class="io-label">Explanation:</span>
+            <span class="io-text">{{ ex.explanation }}</span>
+          </div>
+        </div>
+
+        <!-- Fallback/Additional: When problem has testCases and examples is empty or to reinforce test questions -->
+        <div *ngIf="(!problem.examples || problem.examples.length === 0) && problem.testCases && problem.testCases.length > 0">
+          <div class="example-card neu-card-flat" *ngFor="let tc of problem.testCases; let idx = index">
+            <div class="example-badge">Sample Test Question {{ idx + 1 }}</div>
+            <div class="example-io">
+              <span class="io-label">Input:</span>
+              <code class="io-code">{{ tc.input }}</code>
+            </div>
+            <div class="example-io">
+              <span class="io-label">Expected Output:</span>
+              <code class="io-code">{{ tc.expectedOutput }}</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Input / Output Formats -->
+      <section class="section-block">
+        <h3 class="section-heading">Input & Output Specifications</h3>
+        <div class="format-card neu-card-inset">
+          <strong>Input Format:</strong>
+          <p>{{ problem.inputFormat }}</p>
+          <strong class="mt-2">Output Format:</strong>
+          <p>{{ problem.outputFormat }}</p>
+        </div>
+      </section>
+
+      <!-- Constraints Section -->
+      <section class="section-block">
+        <h3 class="section-heading">Constraints</h3>
+        <ul class="constraints-list">
+          <li *ngFor="let c of problem.constraints" class="constraint-item">
+            <code>{{ c }}</code>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Staff Name Below Question Section -->
+      <section class="section-block staff-attribution-section" style="margin-top: 1.5rem; border-top: 1px dashed rgba(0,0,0,0.12); padding-top: 1rem;">
+        <div class="question-staff-bar neu-card-inset" style="padding: 0.75rem 1rem; border-radius: var(--neu-radius-md); display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 1.7rem;">👨‍🏫</div>
+          <div>
+            <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--neu-text-muted); display: block; font-weight: 700;">Question Staff Author & Reviewer</span>
+            <strong style="font-size: 0.95rem; color: var(--neu-primary);">{{ getStaffAuthorName(problem) }}</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Right Side: Monaco Code Editor & Test Case Runner Panel -->
+  <main class="editor-panel">
+    <!-- Editor Header Toolbar -->
+    <header class="editor-toolbar neu-card-flat">
+      <div class="toolbar-left">
+        <!-- Live DB Status -->
+        <span class="neu-badge" [ngClass]="dbConnected ? 'neu-badge-easy' : 'neu-badge-medium'" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
+          {{ dbConnected ? '● MongoDB Live' : '⟳ Connecting DB...' }}
+        </span>
+
+        <!-- Language Selector -->
+        <div class="select-wrapper">
+          <select
+            class="neu-select lang-select"
+            [ngModel]="selectedLanguage"
+            (ngModelChange)="onLanguageChange($event)"
+            [disabled]="isExecuting || isSubmitting"
+          >
+            <option *ngFor="let lang of languages" [value]="lang.value">
+              {{ lang.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Reset Boilerplate Code Button -->
+        <button
+          type="button"
+          class="neu-btn neu-btn-sm"
+          (click)="resetCode()"
+          title="Reset to starter boilerplate"
+          [disabled]="isExecuting || isSubmitting"
+        >
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset
+        </button>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Run Code (Public Test Cases) -->
+        <button
+          type="button"
+          class="neu-btn neu-btn-primary"
+          (click)="runCode()"
+          [disabled]="isExecuting || isSubmitting"
+        >
+          <span class="spinner" *ngIf="isExecuting"></span>
+          <svg *ngIf="!isExecuting" class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          {{ isExecuting ? 'Executing...' : 'Run Code' }}
+        </button>
+
+        <!-- Submit Solution (All Test Cases) -->
+        <button
+          type="button"
+          class="neu-btn neu-btn-success"
+          (click)="submitSolution()"
+          [disabled]="isExecuting || isSubmitting"
+        >
+          <span class="spinner" *ngIf="isSubmitting"></span>
+          <svg *ngIf="!isSubmitting" class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          {{ isSubmitting ? 'Evaluating...' : 'Submit' }}
+        </button>
+      </div>
+    </header>
+
+    <!-- Monaco Code Editor Canvas Frame -->
+    <div class="editor-frame neu-card-inset">
+      <div #editorContainer class="monaco-host"></div>
+      
+      <!-- Fallback Code Area if Monaco script is loading -->
+      <textarea
+        *ngIf="!isMonacoLoaded"
+        class="native-fallback-textarea"
+        [(ngModel)]="currentCode"
+        placeholder="Type your solution code here..."
+        spellcheck="false"
+      ></textarea>
+    </div>
+
+    <!-- Bottom Test Runner & Console Panel -->
+    <section class="test-runner-panel neu-card">
+      <!-- Tabs Navigation -->
+      <div class="tab-header">
+        <button
+          type="button"
+          class="neu-tab-btn"
+          [class.active]="activeBottomTab === 'testcases'"
+          (click)="activeBottomTab = 'testcases'"
+        >
+          Public Test Cases
+          <span class="count-pill">{{ problem.testCases.length }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="neu-tab-btn"
+          [class.active]="activeBottomTab === 'output'"
+          (click)="activeBottomTab = 'output'"
+        >
+          Execution Output
+          <span
+            *ngIf="executionResult"
+            class="verdict-mini-badge"
+            [ngClass]="getStatusClass(executionResult.status)"
+          >
+            {{ executionResult.status }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Public Test Cases Explorer -->
+      <div class="tab-content" *ngIf="activeBottomTab === 'testcases'">
+        <div class="case-pills-row">
+          <button
+            type="button"
+            *ngFor="let tc of problem.testCases; let i = index"
+            class="case-pill-btn"
+            [class.active]="activeTestTabIndex === i"
+            (click)="activeTestTabIndex = i"
+          >
+            Case {{ i + 1 }}
+          </button>
+        </div>
+
+        <div class="case-detail-container" *ngIf="problem.testCases[activeTestTabIndex]">
+          <div class="neu-input-group">
+            <label class="neu-label">Standard Input:</label>
+            <div class="neu-terminal-box">
+              <pre>{{ problem.testCases[activeTestTabIndex].input }}</pre>
+            </div>
+          </div>
+          <div class="neu-input-group mt-2">
+            <label class="neu-label">Expected Output:</label>
+            <div class="neu-terminal-box">
+              <pre>{{ problem.testCases[activeTestTabIndex].expectedOutput }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Execution Verdict & Output Terminal -->
+      <div class="tab-content" *ngIf="activeBottomTab === 'output'">
+        <!-- When No Execution Run Yet -->
+        <div class="empty-output-state" *ngIf="!executionResult && !isExecuting && !isSubmitting">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <p>Click <strong>"Run Code"</strong> to test with public test cases or <strong>"Submit"</strong> for assessment.</p>
+        </div>
+
+        <!-- Spinner During Live Execution -->
+        <div class="loading-state" *ngIf="isExecuting || isSubmitting">
+          <div class="neu-spinner-ring"></div>
+          <p class="loading-msg">
+            {{ isExecuting ? 'Running sandbox test cases...' : 'Verifying all submission test cases...' }}
+          </p>
+        </div>
+
+        <!-- Verdict Display -->
+        <div class="verdict-container" *ngIf="executionResult && !isExecuting && !isSubmitting">
+          <div class="verdict-header" [ngClass]="getStatusClass(executionResult.status)">
+            <div class="verdict-title-box">
+              <h2 class="verdict-status-text">{{ executionResult.status }}</h2>
+              <span class="test-ratio">
+                {{ executionResult.testCasesPassed }} / {{ executionResult.totalTestCases }} test cases passed
+              </span>
+            </div>
+
+            <!-- Execution Metrics -->
+            <div class="metrics-row">
+              <div class="neu-chip metric-chip">
+                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Runtime: <strong>{{ executionResult.executionTime }} ms</strong></span>
+              </div>
+              <div class="neu-chip metric-chip">
+                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <span>Memory: <strong>{{ (executionResult.memoryUsed / 1024).toFixed(1) }} MB</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compilation / Stderr Error Trace -->
+          <div class="error-block" *ngIf="executionResult.errorOutput">
+            <label class="neu-label error-label">Error Output (stderr):</label>
+            <div class="neu-terminal-box terminal-error">
+              <pre>{{ executionResult.errorOutput }}</pre>
+            </div>
+          </div>
+
+          <!-- Test Cases Breakdown Pills & I/O Diff -->
+          <div class="results-breakdown" *ngIf="executionResult.testCaseResults && executionResult.testCaseResults.length > 0">
+            <div class="result-pills-row">
+              <button
+                type="button"
+                *ngFor="let tr of executionResult.testCaseResults; let rIdx = index"
+                class="result-pill-btn"
+                [class.pass]="tr.passed"
+                [class.fail]="!tr.passed"
+                [class.active]="activeResultTestCaseIndex === rIdx"
+                (click)="activeResultTestCaseIndex = rIdx"
+              >
+                <span class="status-dot"></span>
+                Case {{ tr.testCaseIndex }}
+              </button>
+            </div>
+
+            <div
+              class="active-result-detail neu-card-inset"
+              *ngIf="executionResult.testCaseResults[activeResultTestCaseIndex]"
+            >
+              <div class="diff-block">
+                <span class="diff-label">Input:</span>
+                <div class="diff-box">{{ executionResult.testCaseResults[activeResultTestCaseIndex].input }}</div>
+              </div>
+              <div class="diff-block">
+                <span class="diff-label">Expected Output:</span>
+                <div class="diff-box">{{ executionResult.testCaseResults[activeResultTestCaseIndex].expectedOutput }}</div>
+              </div>
+              <div class="diff-block">
+                <span class="diff-label">Your Output:</span>
+                <div
+                  class="diff-box"
+                  [class.diff-mismatch]="!executionResult.testCaseResults[activeResultTestCaseIndex].passed"
+                >
+                  {{ executionResult.testCaseResults[activeResultTestCaseIndex].actualOutput }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

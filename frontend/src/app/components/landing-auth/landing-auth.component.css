@@ -1,0 +1,369 @@
+/* ==============================================================================
+ * College DailyCoding - Institutional Portal Authentication Stylesheet
+ * ============================================================================== */
+
+.landing-page-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--neu-bg);
+  color: var(--neu-text-primary);
+  overflow-x: hidden;
+}
+
+/* Header & Nav */
+.landing-header {
+  padding: 1rem 2rem 0.5rem 2rem;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.75rem;
+  border-radius: var(--neu-radius-lg);
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-flat);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--neu-radius-md);
+  background: var(--neu-primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 12px rgba(79, 70, 229, 0.35), -4px -4px 12px #ffffff;
+  color: #ffffff;
+}
+
+.brand-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--neu-text-primary);
+}
+
+.brand-tagline {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--neu-text-muted);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.institutional-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--neu-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--neu-text-secondary);
+  background: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset);
+}
+
+.status-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.neu-btn-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  border-radius: var(--neu-radius-md);
+}
+
+/* Portal Main Container */
+.portal-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.portal-card {
+  width: 100%;
+  max-width: 520px;
+  background-color: var(--neu-surface);
+  border-radius: var(--neu-radius-xl);
+  box-shadow: var(--neu-shadow-lg);
+  padding: 2.5rem 2.25rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Portal Header */
+.portal-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.portal-emblem {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-primary-gradient);
+  color: #ffffff;
+  box-shadow: 4px 4px 12px rgba(79, 70, 229, 0.4), -4px -4px 12px #ffffff;
+}
+
+.portal-emblem svg {
+  width: 26px;
+  height: 26px;
+}
+
+.portal-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--neu-text-primary);
+  margin: 0 0 0.4rem 0;
+  letter-spacing: -0.02em;
+}
+
+.portal-subtitle {
+  font-size: 0.88rem;
+  color: var(--neu-text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Role Selector Toggle */
+.role-selector-row {
+  margin-bottom: 1.5rem;
+}
+
+.neu-pill-toggle {
+  display: flex;
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset);
+  padding: 5px;
+  border-radius: var(--neu-radius-pill);
+  gap: 6px;
+}
+
+.neu-pill-btn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--neu-radius-pill);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--neu-text-secondary);
+  cursor: pointer;
+  transition: var(--neu-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.neu-pill-btn.active {
+  background: var(--neu-primary-gradient);
+  color: #ffffff;
+  box-shadow: 2px 2px 8px rgba(79, 70, 229, 0.4), -2px -2px 8px #ffffff;
+}
+
+/* Alerts */
+.neu-alert-error {
+  padding: 0.75rem 1rem;
+  border-radius: var(--neu-radius-md);
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  border: 1px solid #fecaca;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.neu-alert-success {
+  padding: 0.75rem 1rem;
+  border-radius: var(--neu-radius-md);
+  background-color: #d1fae5;
+  color: #065f46;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form Layout */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.neu-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.neu-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--neu-text-secondary);
+}
+
+.neu-input,
+.neu-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  border-radius: var(--neu-radius-md);
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset);
+  color: var(--neu-text-primary);
+  box-sizing: border-box;
+  transition: var(--neu-transition-fast);
+}
+
+.neu-input:focus,
+.neu-select:focus {
+  box-shadow: inset 3px 3px 6px #b4b8be, inset -3px -3px 6px #ffffff, 0 0 0 2px var(--neu-primary);
+}
+
+.neu-select {
+  cursor: pointer;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.submit-btn {
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--neu-radius-md);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Footer Switcher */
+.portal-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.portal-footer p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--neu-text-secondary);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--neu-primary);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.35rem;
+  text-decoration: underline;
+  transition: var(--neu-transition-fast);
+}
+
+.link-btn:hover {
+  color: var(--neu-primary-hover);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .landing-header {
+    padding: 0.75rem 1rem 0 1rem;
+  }
+
+  .portal-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .form-row-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .institutional-tag {
+    display: none;
+  }
+}

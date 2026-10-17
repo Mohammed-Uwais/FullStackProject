@@ -1,0 +1,222 @@
+<div class="landing-page-root">
+  <!-- Institutional Navigation Header -->
+  <header class="landing-header">
+    <nav class="landing-nav neu-card">
+      <div class="nav-brand">
+        <div class="brand-icon-box">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-title">College DailyCoding</span>
+          <span class="brand-tagline">Academic Daily Practice & Assessment Portal</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="institutional-tag neu-card-inset">
+          <span class="status-indicator-dot"></span>
+          <span>Campus Portal</span>
+        </div>
+        <button
+          type="button"
+          class="neu-btn neu-btn-sm"
+          [class.neu-btn-primary]="authMode === 'login'"
+          (click)="switchMode('login')"
+        >
+          Sign In
+        </button>
+        <button
+          type="button"
+          class="neu-btn neu-btn-sm"
+          [class.neu-btn-primary]="authMode === 'register'"
+          (click)="switchMode('register')"
+        >
+          Register
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Institutional Portal Center Container -->
+  <main class="portal-main">
+    <div class="portal-card neu-card">
+      <!-- Portal Emblem & Title -->
+      <div class="portal-header">
+        <div class="portal-emblem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <h1 class="portal-title">
+          {{ authMode === 'login' ? 'Institutional Sign In' : 'New User Registration' }}
+        </h1>
+        <p class="portal-subtitle">
+          {{ authMode === 'login' 
+              ? 'Enter your college credentials to access the coding environment' 
+              : 'Enroll your student or staff profile in the college portal' }}
+        </p>
+      </div>
+
+      <!-- Role Selector Toggle (STRICTLY Student vs Staff) -->
+      <div class="role-selector-row">
+        <div class="neu-pill-toggle">
+          <button
+            type="button"
+            class="neu-pill-btn"
+            [class.active]="selectedRole === 'student'"
+            (click)="switchRole('student')"
+          >
+            🎓 Student Portal
+          </button>
+          <button
+            type="button"
+            class="neu-pill-btn"
+            [class.active]="selectedRole === 'staff'"
+            (click)="switchRole('staff')"
+          >
+            💼 Staff Portal
+          </button>
+        </div>
+      </div>
+
+      <!-- Error / Success Alerts -->
+      <div class="neu-alert-error" *ngIf="errorMessage">
+        <span>⚠️</span> {{ errorMessage }}
+      </div>
+      <div class="neu-alert-success" *ngIf="successMessage">
+        <span>✅</span> {{ successMessage }}
+      </div>
+
+      <!-- Auth Form -->
+      <form class="auth-form" (ngSubmit)="onSubmit()">
+        <!-- Full Name (Register Only) -->
+        <div class="neu-input-group" *ngIf="authMode === 'register'">
+          <label class="neu-label">Full Name</label>
+          <input
+            type="text"
+            class="neu-input"
+            [(ngModel)]="name"
+            name="name"
+            placeholder="e.g. Alex Johnson"
+            required
+          />
+        </div>
+
+        <!-- Student Roll Number (Register & Student Only) -->
+        <div class="neu-input-group" *ngIf="authMode === 'register' && selectedRole === 'student'">
+          <label class="neu-label">College Roll Number</label>
+          <input
+            type="text"
+            class="neu-input"
+            [(ngModel)]="rollNumber"
+            name="rollNumber"
+            placeholder="e.g. 22CS104"
+            required
+          />
+        </div>
+
+        <!-- Staff Employee ID (Register & Staff Only) -->
+        <div class="neu-input-group" *ngIf="authMode === 'register' && selectedRole === 'staff'">
+          <label class="neu-label">Staff Employee ID</label>
+          <input
+            type="text"
+            class="neu-input"
+            [(ngModel)]="employeeId"
+            name="employeeId"
+            placeholder="e.g. EMP-9041"
+            required
+          />
+        </div>
+
+        <!-- User ID / Email Address -->
+        <div class="neu-input-group">
+          <label class="neu-label">User ID (Email Address)</label>
+          <input
+            type="email"
+            class="neu-input"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="e.g. yourname@college.edu or personal@gmail.com"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="neu-input-group">
+          <label class="neu-label">{{ authMode === 'register' ? 'Set Your Password' : 'Password' }}</label>
+          <input
+            type="password"
+            class="neu-input"
+            [(ngModel)]="password"
+            name="password"
+            [placeholder]="authMode === 'register' ? 'Choose your password (min 6 characters)' : 'Enter your password'"
+            required
+          />
+        </div>
+
+        <!-- Student Academic Metadata (Register Only) -->
+        <div class="form-row-2col" *ngIf="authMode === 'register' && selectedRole === 'student'">
+          <div class="neu-input-group">
+            <label class="neu-label">Department</label>
+            <select class="neu-select" [(ngModel)]="department" name="department">
+              <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
+          <div class="neu-input-group">
+            <label class="neu-label">Graduation Batch</label>
+            <select class="neu-select" [(ngModel)]="batch" name="batch">
+              <option *ngFor="let b of batches" [value]="b">{{ b }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Staff Designation & Dept (Register Only) -->
+        <div class="form-row-2col" *ngIf="authMode === 'register' && selectedRole === 'staff'">
+          <div class="neu-input-group">
+            <label class="neu-label">Department</label>
+            <select class="neu-select" [(ngModel)]="staffDepartment" name="staffDept">
+              <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
+          <div class="neu-input-group">
+            <label class="neu-label">Designation</label>
+            <select class="neu-select" [(ngModel)]="designation" name="designation">
+              <option *ngFor="let d of designations" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="neu-btn neu-btn-primary submit-btn"
+          [disabled]="isLoading"
+        >
+          <span class="spinner" *ngIf="isLoading"></span>
+          {{ isLoading 
+              ? 'Authenticating...' 
+              : (authMode === 'login' 
+                  ? 'Sign In as ' + (selectedRole === 'student' ? 'Student' : 'Staff') 
+                  : 'Register ' + (selectedRole === 'student' ? 'Student' : 'Staff') + ' Account') }}
+        </button>
+      </form>
+
+      <!-- Toggle Between Login and Register -->
+      <div class="portal-footer">
+        <p *ngIf="authMode === 'login'">
+          Don't have an account yet?
+          <button type="button" class="link-btn" (click)="switchMode('register')">Create an account</button>
+        </p>
+        <p *ngIf="authMode === 'register'">
+          Already registered?
+          <button type="button" class="link-btn" (click)="switchMode('login')">Sign in here</button>
+        </p>
+      </div>
+    </div>
+  </main>
+</div>
